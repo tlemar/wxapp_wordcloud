@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, make_response
 from wordcloud import WordCloud
 import jieba
 from collections import defaultdict
@@ -10,7 +10,8 @@ app = Flask(__name__)
 
 @app.route("/wordcloud", methods=["get", "post"])
 def getWordImage(width=300, height=300):
-    if request.method == "POST":
+    if request.method == "POST":  
+        print("request:",request,request.args,request.files, request.form)
         file = request.files["file"]
         segs = jieba.cut(file.read())
 
@@ -33,10 +34,15 @@ def getWordImage(width=300, height=300):
         wc_image = wc.to_image()
 
         img_stream = io.BytesIO()
-        wc_image.save(img_stream, "png")
+        wc_image.save(img_stream, "png")  
+        headers = {
+            "Access-Control-Allow-Origin":"*",
+            "test":123
+        }
 
-        return "data:image/png;base64," + base64.b64encode(img_stream.getvalue()).decode('ascii')
+        return  make_response( "data:image/png;base64," + base64.b64encode(img_stream.getvalue()).decode('ascii'),200,headers)
     else:
+        print(request,request.form)
         return "please upload a text file"
 
 

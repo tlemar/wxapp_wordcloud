@@ -1,25 +1,58 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>
 		word cloud
 	</title>
+	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
 </head>
+
 <body>
 
-	<form action="http://localhost:5000/wordcloud">
-		
-		<textarea name="material">
-		</textarea> 
-		<input type="submit" name="提交">  
-		<input type="file" name="file">
+	<form id="post_form" enctype="multipart/form-data" method="post" action="http://localhost:5000/wordcloud">
+		<input id="file_input" type="file" name="file">
+		<input type="submit" name="提交">
 	</form>
+
+
+	<div id="app">
+		<button v-on:click="submit">vue submit</button>
+		<img v-bind:src="image_data">
+	</div>
 
 </body>
 
 <style>
-	input{
+	input {
 		display: block;
 	}
 </style>
+<script>
+	// 实现表单的ajax请求
+	var app = new Vue({
+		el: "#app",
+		data: {
+			image_data: ""
+		},
+		methods: {
+			submit: function () {
+				var that = this
+				var formData = new FormData()
+				formData.append("file", document.getElementById("file_input").files[0])
+				var request = new XMLHttpRequest();
+				request.open("POST", "http://localhost:5000/wordcloud")
+				request.send(formData)
+
+				request.onreadystatechange = function () {
+					if (request.readyState === 4 && request.status === 200) {
+						that.$data.image_data = request.response
+					}
+				}
+			}
+		}
+	});
+</script>
+
 </html>

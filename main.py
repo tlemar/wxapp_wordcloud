@@ -4,6 +4,7 @@ import jieba
 from collections import defaultdict
 import io
 import base64
+import platform
 
 app = Flask(__name__)
 
@@ -27,8 +28,15 @@ def getWordImage(width=300, height=300):
             if seg not in stop_words:
                 word_freqs[seg] += 1
 
-        print("", word_freqs)
-        wc = WordCloud(width=width, height=height)
+        if platform.system() == "Darwin":
+            wc = WordCloud(width=width, height=height, font_path="/Library/Fonts/Songti.ttc")
+        elif platform.system() == "Linux":
+            wc = WordCloud(width=width, height=height, font_path="/Library/Fonts/Songti.ttc") 
+        elif platform.system() == "Windows":
+            wc = WordCloud(width=width, height=height, font_path="/Library/Fonts/Songti.ttc")  
+        else:
+            wc = WordCloud(width=width, height=height) 
+
         wc.generate_from_frequencies(word_freqs)
         print("test ", wc.to_image(), type(wc.to_image()))
         wc_image = wc.to_image()
@@ -36,8 +44,7 @@ def getWordImage(width=300, height=300):
         img_stream = io.BytesIO()
         wc_image.save(img_stream, "png")  
         headers = {
-            "Access-Control-Allow-Origin":"*",
-            "test":123
+            "Access-Control-Allow-Origin":"*"
         }
 
         return  make_response( "data:image/png;base64," + base64.b64encode(img_stream.getvalue()).decode('ascii'),200,headers)
